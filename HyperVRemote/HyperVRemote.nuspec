@@ -7,6 +7,7 @@
     <owners>tibbar</owners>
     <projectUrl>https://github.com/AlexsJones/HyperVRemote</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>HyperVRemote control from C# wrapping WMI</description>
+    <description>HyperVRemote control from C# wrapping WMI. Best used with IoC. Find usage and more information available on the project home page</description>
+    <tags>hyper-v, hyperv, virtualmachine, vm, connection</tags>
   </metadata>
 </package>
