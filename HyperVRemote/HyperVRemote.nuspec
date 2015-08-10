@@ -3,8 +3,9 @@
   <metadata>
     <id>HyperVRemote</id>
     <version>$version$</version>
-    <authors>jonesax</authors>
-    <owners>jonesax</owners>
+    <authors>tibbar</authors>
+    <owners>tibbar</owners>
+    <projectUrl>https://github.com/AlexsJones/HyperVRemote</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>HyperVRemote control from C# wrapping WMI</description>
   </metadata>
