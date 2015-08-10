@@ -3,6 +3,8 @@ Nuget for hyperv control from C#
 
 Best used with inversion of control
 
+Get it here: `Install-Package HyperVRemote`
+
 ##Example
 
 ```C#
