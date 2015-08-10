@@ -1,14 +1,22 @@
 # HyperVRemote
 nuget for hyperv remote
+Best used with inversion of control
 
-##Examples
+##Example
 
 ```C#
 var provider = _container.Resolve<IHyperVProvider>();
 
 provider.Connect();
 
-IHyperVMachine machine = provider.GetMachineByName(MachineName);
+IEnumerable<IHyperVMachine> machines = provider.GetMachines();
+
+foreach (var machine in machines)
+{
+  Debug.WriteLine("Found machine => " + provider.GetName(machine));
+}
+
+IHyperVMachine machine = provider.GetMachineByName("SomeVM");
 
 provider.Reset(machine);
 ```
