@@ -1,5 +1,6 @@
 # HyperVRemote
-nuget for hyperv remote
+Nuget for hyperv control from C#
+
 Best used with inversion of control
 
 ##Example
