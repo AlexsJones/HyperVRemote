@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperVRemote", "HyperVRemote\HyperVRemote.csproj", "{B955B2C6-0C37-4B95-965D-A1AC5E0CA284}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperVTests", "HyperVTests\HyperVTests.csproj", "{9DA95797-BDFC-45FC-A81F-9384BE8466F9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B955B2C6-0C37-4B95-965D-A1AC5E0CA284}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B955B2C6-0C37-4B95-965D-A1AC5E0CA284}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B955B2C6-0C37-4B95-965D-A1AC5E0CA284}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B955B2C6-0C37-4B95-965D-A1AC5E0CA284}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9DA95797-BDFC-45FC-A81F-9384BE8466F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DA95797-BDFC-45FC-A81F-9384BE8466F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DA95797-BDFC-45FC-A81F-9384BE8466F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DA95797-BDFC-45FC-A81F-9384BE8466F9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

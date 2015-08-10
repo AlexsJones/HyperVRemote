@@ -4,7 +4,13 @@ ehthumbs.db
 
 # Folder config file
 Desktop.ini
-
+bin
+*.packages
+packages
+obj
+*.dll
+*.nupkg
+Temporary*
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 
