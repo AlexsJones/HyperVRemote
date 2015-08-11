@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Source\Implementation\HyperVConfiguration.cs" />
+    <Compile Include="Source\Implementation\HyperVException.cs" />
     <Compile Include="Source\Implementation\HyperVMachine.cs" />
     <Compile Include="Source\Implementation\HyperVProvider.cs" />
     <Compile Include="Source\Interface\IHyperVConfiguration.cs" />

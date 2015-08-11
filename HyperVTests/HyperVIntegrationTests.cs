@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using Autofac;
 using Autofac.Core;
 using FluentAssertions;
 using HyperVRemote.Source.Implementation;
 using HyperVRemote.Source.Interface;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NUnit.Framework;
 
 namespace HyperVTests
 {
     [TestFixture]
-    public class HyperVTests
+    public class HyperVIntegrationTests
     {
-        private const string MachineName = "__YOUR__COMPUTER_OR__VM__";
-        private const string TestUserName = @"__YOUR_USERNAME__";
-        private const string TestPassword = @"__OUR_PASSWORD__";
-        private const string TestServerName = @"__YOUR_SERVER__";
+        private const string MachineName = "__NOT__SET__";
+        private const string TestUserName = @"__NOT__SET__";
+        private const string TestPassword = @"__NOT__SET__";
+        private const string TestServerName = @"__NOT__SET__";
         private const string TestNameSpace = @"root\virtualization\v2";
         private IContainer _container;
         [SetUp]
@@ -88,6 +88,26 @@ namespace HyperVTests
         }
 
         [Test, NUnit.Framework.Ignore]
+        public void TestCheckpointMachineByName()
+        {
+            var provider = _container.Resolve<IHyperVProvider>();
+
+            provider.Connect();
+
+            IHyperVMachine machine = provider.GetMachineByName(MachineName);
+
+            provider.Stop(machine);
+
+            provider.RestoreLastSnapShot(machine);
+
+            Thread.Sleep(5000);
+
+            provider.Start(machine);
+
+        }
+
+
+        [Test, NUnit.Framework.Ignore]
         [Microsoft.VisualStudio.TestTools.UnitTesting.ExpectedException(typeof(Exception))]
         public void TestMachineRestore()
         {
@@ -123,6 +143,44 @@ namespace HyperVTests
             IHyperVMachine machine = provider.GetMachineByName(MachineName);
 
             provider.Stop(machine);
+        }
+
+        [Test, NUnit.Framework.Ignore]
+        public void TestMachinePollStatus()
+        {
+            var provider = _container.Resolve<IHyperVProvider>();
+
+            provider.Connect();
+
+            IHyperVMachine machine = provider.GetMachineByName(MachineName);
+
+            HyperVStatus status = provider.GetStatus(machine);
+
+            Stopwatch s = new Stopwatch();
+            
+            s.Start();
+
+            bool isReset = false;
+
+            while (s.Elapsed.TotalSeconds < 15)
+            {
+                machine = provider.GetMachineByName(MachineName);
+                status = provider.GetStatus(machine);
+
+                Debug.WriteLine("Machine Status is => " + status);
+
+                if (s.Elapsed.TotalSeconds >= 1 && !isReset)
+                {
+                    provider.Reset(machine);
+
+                    isReset = true;
+                }
+
+                Thread.Sleep(1000);
+            }
+
+            s.Stop();
+
         }
     }
 }

@@ -33,6 +33,19 @@ namespace HyperVRemote.Source.Implementation
             _configuration = configuration;
         }
 
+        public HyperVStatus GetStatus(IHyperVMachine machine)
+        {
+            if (_scope == null)
+            {
+                throw new HyperVException("No management scope present");
+            }
+
+            var rawMachine = ((HyperVMachine) machine).FetchRawMachine();
+
+
+            return (HyperVStatus)rawMachine["EnabledState"];
+        }
+
         public void Connect()
         {
             _scope = new ManagementScope(new ManagementPath
@@ -66,22 +79,22 @@ namespace HyperVRemote.Source.Implementation
 
         public string GetName(IHyperVMachine machine)
         {
-            return (((HyperVMachine)machine).FetchRawMachine()["ElementName"] as string);
+            return machine.FetchName();
         }
 
         public void Reset(IHyperVMachine machine)
         {
-            ChangeState(machine, VmRequestedState.Reset);
+            ChangeState(machine, HyperVStatus.Reset);
         }
 
         public void Start(IHyperVMachine machine)
         {
-            ChangeState(machine, VmRequestedState.Running);
+            ChangeState(machine, HyperVStatus.Running);
         }
 
         public void Stop(IHyperVMachine machine)
         {
-            ChangeState(machine, VmRequestedState.Off);
+            ChangeState(machine, HyperVStatus.Off);
         }
 
         public void RestoreLastSnapShot(IHyperVMachine machine)
@@ -100,7 +113,7 @@ namespace HyperVRemote.Source.Implementation
 
             if (lastSnapshot == null)
             {
-                throw new Exception("No Snapshot found");
+                throw new HyperVException("No Snapshot found");
             }
             
             var managementService = new ManagementClass(_scope, new ManagementPath("Msvm_VirtualSystemSnapshotService"), null)
@@ -115,7 +128,7 @@ namespace HyperVRemote.Source.Implementation
 
         }
 
-        private uint ChangeState(IHyperVMachine machine, VmRequestedState state)
+        private uint ChangeState(IHyperVMachine machine, HyperVStatus state)
         {
             var rawMachine = ((HyperVMachine)machine).FetchRawMachine();
 
@@ -137,7 +150,7 @@ namespace HyperVRemote.Source.Implementation
             }
             else
             {
-                throw new Exception("Could not find machine management service for rstate change");
+                throw new HyperVException("Could not find machine management service for rstate change");
             }
 
             return 0;

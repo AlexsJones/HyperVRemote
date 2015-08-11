@@ -8,6 +8,6 @@ namespace HyperVRemote.Source.Interface
 {
     public interface IHyperVMachine
     {
-
+        string FetchName();
     }
 }
