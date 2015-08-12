@@ -117,7 +117,15 @@ namespace HyperVTests
 
             IHyperVMachine machine = provider.GetMachineByName(MachineName);
 
+            provider.Stop(machine);
+
+            Thread.Sleep(2000);
+
             provider.RestoreLastSnapShot(machine);
+
+            Thread.Sleep(2000);
+
+            provider.Start(machine);
         }
 
         [Test, NUnit.Framework.Ignore]
