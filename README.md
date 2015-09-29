@@ -50,7 +50,7 @@ HyperVProvider provider = new HyperVProvider(configuration);
 ```
 ###API Overview
 
-```
+```C#
 HyperVStatus GetStatus(IHyperVMachine machine);
 
 void Connect();
