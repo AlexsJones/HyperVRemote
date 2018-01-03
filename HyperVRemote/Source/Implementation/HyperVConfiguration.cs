@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Management;
-using System.Text;
-using System.Threading.Tasks;
 using HyperVRemote.Source.Interface;
 
 namespace HyperVRemote.Source.Implementation
@@ -18,15 +13,20 @@ namespace HyperVRemote.Source.Implementation
 
         public string HyperVNameSpace { get; }
 
-        public HyperVConfiguration(string username, string userpassword,
-            string servername, string nameSpace)
+        public string Domain { get; set; }
+
+
+        public HyperVConfiguration(
+            string username,
+            string userpassword,
+            string domain,
+            string servername, 
+            string nameSpace)
         {
             HyperVUserName = username;
-
             HyperVUserPassword = userpassword;
-
+            Domain = domain;
             HyperVServerName = servername;
-
             HyperVNameSpace = nameSpace;
         }
 
@@ -53,6 +53,11 @@ namespace HyperVRemote.Source.Implementation
         public TimeSpan Timeout()
         {
             return TimeSpan.FromSeconds(15);
+        }
+
+        public string FetchDomain()
+        {
+            return Domain;
         }
     }
 }

@@ -19,17 +19,38 @@ namespace HyperVRemote.Source.Implementation
 
         public HyperVProvider(IHyperVConfiguration configuration)
         {
-            Options = new ConnectionOptions(
-                @"en-US",
-                configuration.FetchUsername(),
-                configuration.FetchPassword(),
-                null,
-                ImpersonationLevel.Impersonate, // I don't know if this is correct, but it worked for me
-                AuthenticationLevel.Default,
-                false,
-                null,
-                configuration.Timeout());
+            var options = new ConnectionOptions();
+            options.Locale = @"en-US";
 
+            var domain = configuration.FetchDomain();
+            if(!string.IsNullOrWhiteSpace(domain))
+            {
+                options.Authority = "ntlmdomain:" + domain;
+            }
+
+            var userName = configuration.FetchUsername();
+            if (!string.IsNullOrWhiteSpace(userName))
+            {
+                options.Username = userName;
+            }
+
+            var password = configuration.FetchPassword();
+            if (!string.IsNullOrWhiteSpace(password))
+            {
+                options.Password = password;
+            }
+
+
+            options.Timeout = configuration.Timeout();
+            //configuration.FetchPassword(),
+            //    null,
+            //    ImpersonationLevel.Impersonate, // I don't know if this is correct, but it worked for me
+            //    AuthenticationLevel.Default,
+            //    false,
+            //    null,
+               // configuration.Timeout());
+
+            Options = options;
             _configuration = configuration;
         }
 

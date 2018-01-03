@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using Autofac;
-using Autofac.Core;
 using FluentAssertions;
 using HyperVRemote.Source.Implementation;
 using HyperVRemote.Source.Interface;
@@ -11,40 +10,29 @@ using NUnit.Framework;
 
 namespace HyperVTests
 {
+    [Category("Integration")]
     [TestFixture]
     public class HyperVIntegrationTests
     {
-        private const string MachineName = "__NOT__SET__";
-        private const string TestUserName = @"__NOT__SET__";
-        private const string TestPassword = @"__NOT__SET__";
-        private const string TestServerName = @"__NOT__SET__";
+        private const string TestMachineName = "VS Emulator 7-inch KitKat (4.4) XHDPI Tablet.darrell";
+        private const string TestUserName = @""; // cant use credentials with local server. see https://blogs.technet.microsoft.com/richard_macdonald/2008/08/11/programming-hyper-v-with-wmi-and-c-getting-started/
+        private const string TestPassword = @""; 
+        private const string TestServerName = @".";
         private const string TestNameSpace = @"root\virtualization\v2";
+        private const string TestDomainName = @"";
+
         private IContainer _container;
+
+        private IHyperVConfiguration _hyperVConfigutation;
+
         [SetUp]
         public void Setup()
         {
+            _hyperVConfigutation = new HyperVConfiguration(TestUserName, TestPassword, TestDomainName, TestServerName, TestNameSpace);
             ContainerBuilder builder = new ContainerBuilder();
-
-            builder.RegisterType<HyperVConfiguration>().As<IHyperVConfiguration>().WithParameters(new[]
-            {
-                 new ResolvedParameter((p,c) =>
-                        p.Name == "username",
-                        (p,c) => TestUserName),
-                 new ResolvedParameter((p,c) =>
-                        p.Name == "userpassword",
-                        (p,c) => TestPassword),
-                 new ResolvedParameter((p,c) =>
-                        p.Name == "servername",
-                        (p,c) => TestServerName),
-                 new ResolvedParameter((p,c) =>
-                        p.Name == "nameSpace",
-                        (p,c) => TestNameSpace),
-            });
-
+            builder.RegisterInstance(_hyperVConfigutation).As<IHyperVConfiguration>();
             builder.RegisterType<HyperVMachine>().As<IHyperVMachine>();
-
             builder.RegisterType<HyperVProvider>().As<IHyperVProvider>();
-
             _container = builder.Build();
         }
 
@@ -59,42 +47,40 @@ namespace HyperVTests
 
             foreach (var machine in machines)
             {
-                Debug.WriteLine("Found machine => " + provider.GetName(machine));
+                Console.WriteLine("Found machine => " + provider.GetName(machine));
             }
         }
 
-        [Test]
-        public void TestFetchMachineByName()
+        [TestCase(TestMachineName)]
+        public void TestFetchMachineByName(string machineName)
         {
             var provider = _container.Resolve<IHyperVProvider>();
 
             provider.Connect();
 
-            IHyperVMachine machine = provider.GetMachineByName(MachineName);
+            IHyperVMachine machine = provider.GetMachineByName(machineName);
 
             machine.Should().NotBeNull();
         }
 
-        [Test, NUnit.Framework.Ignore]
-        public void TestResetMachineByName()
+        [TestCase(TestMachineName)]
+        public void TestResetMachineByName(string machineName)
         {
             var provider = _container.Resolve<IHyperVProvider>();
 
             provider.Connect();
-
-            IHyperVMachine machine = provider.GetMachineByName(MachineName);
-
+            IHyperVMachine machine = provider.GetMachineByName(machineName);
             provider.Reset(machine);
         }
 
-        [Test, NUnit.Framework.Ignore]
-        public void TestCheckpointMachineByName()
+        [TestCase(TestMachineName)]
+        public void TestCheckpointMachineByName(string machineName)
         {
             var provider = _container.Resolve<IHyperVProvider>();
 
             provider.Connect();
 
-            IHyperVMachine machine = provider.GetMachineByName(MachineName);
+            IHyperVMachine machine = provider.GetMachineByName(machineName);
 
             provider.Stop(machine);
 
@@ -107,15 +93,15 @@ namespace HyperVTests
         }
 
 
-        [Test, NUnit.Framework.Ignore]
+        [TestCase(TestMachineName)]
         [Microsoft.VisualStudio.TestTools.UnitTesting.ExpectedException(typeof(Exception))]
-        public void TestMachineRestore()
+        public void TestMachineRestore(string machineName)
         {
             var provider = _container.Resolve<IHyperVProvider>();
 
             provider.Connect();
 
-            IHyperVMachine machine = provider.GetMachineByName(MachineName);
+            IHyperVMachine machine = provider.GetMachineByName(machineName);
 
             provider.Stop(machine);
 
@@ -128,39 +114,38 @@ namespace HyperVTests
             provider.Start(machine);
         }
 
-        [Test, NUnit.Framework.Ignore]
-       
-        public void TestMachineStart()
+        [TestCase(TestMachineName)]
+        public void TestMachineStart(string machineName)
         {
             var provider = _container.Resolve<IHyperVProvider>();
 
             provider.Connect();
 
-            IHyperVMachine machine = provider.GetMachineByName(MachineName);
+            IHyperVMachine machine = provider.GetMachineByName(machineName);
 
             provider.Start(machine);
         }
 
-        [Test, NUnit.Framework.Ignore]
-        public void TestMachineStop()
+        [TestCase(TestMachineName), NUnit.Framework.Ignore("")]
+        public void TestMachineStop(string machineName)
         {
             var provider = _container.Resolve<IHyperVProvider>();
 
             provider.Connect();
 
-            IHyperVMachine machine = provider.GetMachineByName(MachineName);
+            IHyperVMachine machine = provider.GetMachineByName(machineName);
 
             provider.Stop(machine);
         }
 
-        [Test, NUnit.Framework.Ignore]
-        public void TestMachinePollStatus()
+        [TestCase(TestMachineName)]
+        public void TestMachinePollStatus(string machineName)
         {
             var provider = _container.Resolve<IHyperVProvider>();
 
             provider.Connect();
 
-            IHyperVMachine machine = provider.GetMachineByName(MachineName);
+            IHyperVMachine machine = provider.GetMachineByName(machineName);
 
             HyperVStatus status = provider.GetStatus(machine);
 
@@ -172,7 +157,7 @@ namespace HyperVTests
 
             while (s.Elapsed.TotalSeconds < 15)
             {
-                machine = provider.GetMachineByName(MachineName);
+                machine = provider.GetMachineByName(machineName);
                 status = provider.GetStatus(machine);
 
                 Debug.WriteLine("Machine Status is => " + status);
