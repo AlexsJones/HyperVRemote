@@ -126,7 +126,7 @@ namespace HyperVTests
             provider.Start(machine);
         }
 
-        [TestCase(TestMachineName), NUnit.Framework.Ignore("")]
+        [TestCase(TestMachineName)]
         public void TestMachineStop(string machineName)
         {
             var provider = _container.Resolve<IHyperVProvider>();
