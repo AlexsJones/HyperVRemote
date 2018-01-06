@@ -1,13 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HyperVRemote.Source.Interface
+﻿namespace HyperVRemote.Source.Interface
 {
     public interface IHyperVMachine
     {
-        string FetchName();
+        string GetName();
+
+        HyperVStatus GetStatus();
+
+        void Start();
+
+        void Stop();
+
+        void Reset();
+
+        void RestoreLastSnapShot();
+
     }
 }

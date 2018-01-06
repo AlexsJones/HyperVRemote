@@ -25,21 +25,13 @@ namespace HyperVRemote.Source.Interface
 
     public interface IHyperVProvider
     {
-        HyperVStatus GetStatus(IHyperVMachine machine);
+     
         void Connect();
 
         IEnumerable<IHyperVMachine> GetMachines();
 
-        IHyperVMachine GetMachineByName(string name);
+        IHyperVMachine GetMachineByName(string name);      
 
-        string GetName(IHyperVMachine machine);
-
-        void Start(IHyperVMachine machine);
-
-        void Stop(IHyperVMachine machine);
-
-        void Reset(IHyperVMachine machine);
-
-        void RestoreLastSnapShot(IHyperVMachine machine);
+      
     }
 }

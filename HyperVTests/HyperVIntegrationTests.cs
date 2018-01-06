@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using Autofac;
 using FluentAssertions;
-using HyperVRemote.Source.Implementation;
 using HyperVRemote.Source.Interface;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 
 namespace HyperVTests
@@ -15,46 +14,47 @@ namespace HyperVTests
     public class HyperVIntegrationTests
     {
         private const string TestMachineName = "VS Emulator 7-inch KitKat (4.4) XHDPI Tablet.darrell";
-        private const string TestUserName = @""; // cant use credentials with local server. see https://blogs.technet.microsoft.com/richard_macdonald/2008/08/11/programming-hyper-v-with-wmi-and-c-getting-started/
-        private const string TestPassword = @""; 
-        private const string TestServerName = @".";
-        private const string TestNameSpace = @"root\virtualization\v2";
-        private const string TestDomainName = @"";
-
-        private IContainer _container;
-
-        private IHyperVConfiguration _hyperVConfigutation;
+        private IServiceProvider _container;
 
         [SetUp]
         public void Setup()
         {
-            _hyperVConfigutation = new HyperVConfiguration(TestUserName, TestPassword, TestDomainName, TestServerName, TestNameSpace);
-            ContainerBuilder builder = new ContainerBuilder();
-            builder.RegisterInstance(_hyperVConfigutation).As<IHyperVConfiguration>();
-            builder.RegisterType<HyperVMachine>().As<IHyperVMachine>();
-            builder.RegisterType<HyperVProvider>().As<IHyperVProvider>();
-            _container = builder.Build();
+            var services = new ServiceCollection();
+
+            services.AddHyperVRemote((options) =>
+            {
+                // defaults to working against local hyperv server which is fine, but lets be explicit.
+                options.HyperVServerName = ".";
+                options.HyperVUserName = "";  // cant use credentials with local server. see https://blogs.technet.microsoft.com/richard_macdonald/2008/08/11/programming-hyper-v-with-wmi-and-c-getting-started/;
+
+            });
+
+            //_hyperVConfigutation = new HyperVConfiguration(TestUserName, TestPassword, TestDomainName, TestServerName, TestNameSpace);
+            //ContainerBuilder builder = new ContainerBuilder();
+            //builder.RegisterInstance(_hyperVConfigutation).As<IHyperVConfiguration>();
+            //builder.RegisterType<HyperVMachine>().As<IHyperVMachine>();
+            //builder.RegisterType<HyperVProvider>().As<IHyperVProvider>();
+            _container = services.BuildServiceProvider();
         }
 
         [Test]
         public void TestFetchMachines()
         {
-            var provider = _container.Resolve<IHyperVProvider>();
-
+            var provider = _container.GetRequiredService<IHyperVProvider>();
             provider.Connect();
 
             IEnumerable<IHyperVMachine> machines = provider.GetMachines();
 
             foreach (var machine in machines)
             {
-                Console.WriteLine("Found machine => " + provider.GetName(machine));
+                Console.WriteLine("Found machine => " + machine.GetName());
             }
         }
 
         [TestCase(TestMachineName)]
         public void TestFetchMachineByName(string machineName)
         {
-            var provider = _container.Resolve<IHyperVProvider>();
+            var provider = _container.GetRequiredService<IHyperVProvider>();
 
             provider.Connect();
 
@@ -66,29 +66,29 @@ namespace HyperVTests
         [TestCase(TestMachineName)]
         public void TestResetMachineByName(string machineName)
         {
-            var provider = _container.Resolve<IHyperVProvider>();
+            var provider = _container.GetRequiredService<IHyperVProvider>();
 
             provider.Connect();
             IHyperVMachine machine = provider.GetMachineByName(machineName);
-            provider.Reset(machine);
+            machine.Reset();
         }
 
         [TestCase(TestMachineName)]
         public void TestCheckpointMachineByName(string machineName)
         {
-            var provider = _container.Resolve<IHyperVProvider>();
+            var provider = _container.GetRequiredService<IHyperVProvider>();
 
             provider.Connect();
 
             IHyperVMachine machine = provider.GetMachineByName(machineName);
 
-            provider.Stop(machine);
+            machine.Stop();
 
-            provider.RestoreLastSnapShot(machine);
+            machine.RestoreLastSnapShot();
 
             Thread.Sleep(5000);
 
-            provider.Start(machine);
+            machine.Start();
 
         }
 
@@ -97,60 +97,60 @@ namespace HyperVTests
         [Microsoft.VisualStudio.TestTools.UnitTesting.ExpectedException(typeof(Exception))]
         public void TestMachineRestore(string machineName)
         {
-            var provider = _container.Resolve<IHyperVProvider>();
+            var provider = _container.GetRequiredService<IHyperVProvider>();
 
             provider.Connect();
 
             IHyperVMachine machine = provider.GetMachineByName(machineName);
 
-            provider.Stop(machine);
+            machine.Stop();
 
             Thread.Sleep(2000);
 
-            provider.RestoreLastSnapShot(machine);
+            machine.RestoreLastSnapShot();
 
             Thread.Sleep(2000);
 
-            provider.Start(machine);
+            machine.Start();
         }
 
         [TestCase(TestMachineName)]
         public void TestMachineStart(string machineName)
         {
-            var provider = _container.Resolve<IHyperVProvider>();
+            var provider = _container.GetRequiredService<IHyperVProvider>();
 
             provider.Connect();
 
             IHyperVMachine machine = provider.GetMachineByName(machineName);
 
-            provider.Start(machine);
+            machine.Start();
         }
 
         [TestCase(TestMachineName)]
         public void TestMachineStop(string machineName)
         {
-            var provider = _container.Resolve<IHyperVProvider>();
+            var provider = _container.GetRequiredService<IHyperVProvider>();
 
             provider.Connect();
 
             IHyperVMachine machine = provider.GetMachineByName(machineName);
 
-            provider.Stop(machine);
+            machine.Stop();
         }
 
         [TestCase(TestMachineName)]
         public void TestMachinePollStatus(string machineName)
         {
-            var provider = _container.Resolve<IHyperVProvider>();
+            var provider = _container.GetRequiredService<IHyperVProvider>();
 
             provider.Connect();
 
             IHyperVMachine machine = provider.GetMachineByName(machineName);
 
-            HyperVStatus status = provider.GetStatus(machine);
+            HyperVStatus status = machine.GetStatus();
 
             Stopwatch s = new Stopwatch();
-            
+
             s.Start();
 
             bool isReset = false;
@@ -158,13 +158,13 @@ namespace HyperVTests
             while (s.Elapsed.TotalSeconds < 15)
             {
                 machine = provider.GetMachineByName(machineName);
-                status = provider.GetStatus(machine);
+                status = machine.GetStatus();
 
                 Debug.WriteLine("Machine Status is => " + status);
 
                 if (s.Elapsed.TotalSeconds >= 1 && !isReset)
                 {
-                    provider.Reset(machine);
+                    machine.Reset();
 
                     isReset = true;
                 }
@@ -175,5 +175,26 @@ namespace HyperVTests
             s.Stop();
 
         }
+
+        [OneTimeTearDown()]
+        public void OneTimeTearDown()
+        {
+            // Ensure we shut down the test image after tests complete.
+            var provider = _container.GetRequiredService<IHyperVProvider>();
+
+            Thread.Sleep(5000);
+           // provider.Connect();
+
+            IHyperVMachine machine = provider.GetMachineByName(TestMachineName);
+
+            HyperVStatus status = machine.GetStatus();
+            if(status != HyperVStatus.Off)
+            {
+                machine.Stop();
+            }          
+
+        }
+
+
     }
 }
