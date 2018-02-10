@@ -1,67 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Management;
-using System.Text;
-using System.Threading.Tasks;
-using Autofac;
-using Autofac.Core;
-using AutofacContrib.NSubstitute;
-using FluentAssertions;
+﻿using FluentAssertions;
 using HyperVRemote.Source.Implementation;
 using HyperVRemote.Source.Interface;
-using NSubstitute;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 
 namespace HyperVTests
 {
     [TestFixture]
     public class HyperVUnitTests
-    {
-
-        [Test]
-        public void TestGetMachineByName()
-        {
-            var autoSubstitute = new AutoSubstitute();
-
-            autoSubstitute.Resolve<IHyperVConfiguration>().FetchNamespacePath().Returns("TestNameSpace");
-
-            autoSubstitute.Resolve<IHyperVConfiguration>().FetchServer().Returns("TestServer");
-
-            autoSubstitute.Resolve<IHyperVConfiguration>().FetchUsername().Returns("TestUsername");
-
-            autoSubstitute.Resolve<IHyperVConfiguration>().FetchPassword().Returns("TestPassword");
-
-            var provider = autoSubstitute.ResolveAndSubstituteFor<IHyperVProvider>();
-
-            var machine = new HyperVMachine(
-                new ManagementObject("")
-                );
-
-            provider.GetMachineByName("Test").Returns( machine );
-
-            provider.GetMachineByName("Test").Should().Be(machine);
-        }
+    {       
 
         [Test]
         public void TestConfiguration()
         {
-            var autoSubstitute = new AutoSubstitute
-                (c => c.RegisterType<HyperVProvider>().As<IHyperVProvider>());
 
-            autoSubstitute.Resolve<IHyperVConfiguration>().FetchNamespacePath().Returns("TestNameSpace");
-
-            autoSubstitute.Resolve<IHyperVConfiguration>().FetchServer().Returns("TestServer");
-
-            autoSubstitute.Resolve<IHyperVConfiguration>().FetchUsername().Returns("TestUsername");
-
-            autoSubstitute.Resolve<IHyperVConfiguration>().FetchPassword().Returns("TestPassword");
-
-            var provider = autoSubstitute.Resolve<IHyperVProvider>();
+            var services = new ServiceCollection();
+            services.AddHyperVRemote((options) =>
+            {
+                // defaults to working against local hyperv server which is fine, but lets be explicit.
+                options.HyperVServerName = "TestServer";
+                options.HyperVUserName = "TestUsername";  // cant use credentials with local server. see https://blogs.technet.microsoft.com/richard_macdonald/2008/08/11/programming-hyper-v-with-wmi-and-c-getting-started/;
+                options.HyperVUserPassword = "TestPassword";
+                options.HyperVNameSpace = "TestNameSpace";
+            });
+            var sp = services.BuildServiceProvider();
+            var provider = sp.GetRequiredService<IHyperVProvider>();
 
             HyperVProvider hprovider = provider as HyperVProvider;
-
-            hprovider.Options.Username.Should().Be("TestUsername");
+            hprovider.ConnectionOptions.Username.Should().Be("TestUsername");
 
         }
     }
